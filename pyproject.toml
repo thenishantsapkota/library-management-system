@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "library-management-backend"
+version = "0.1.0"
+description = "A backend application for a library management system"
+authors = ["Nishant Sapkota <snishant306@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = {extras = ["uvicorn"], version = "^0.75.2"}
+fastapi-utils = "^0.2.1"
+uvicorn = {extras = ["standard"], version = "^0.17.6"}
+sqlmodel = "^0.0.6"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
