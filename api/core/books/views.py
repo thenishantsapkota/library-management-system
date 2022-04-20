@@ -22,7 +22,7 @@ class BookView:
         data = await Book_Pydantic.from_tortoise_orm(book_obj)
         return {"success": True, "data": data}
 
-    @router.post("/update-book/{book_id}")
+    @router.put("/update-book/{book_id}")
     async def update_book(self, book_id: int, book: BookIn_Pydantic):
         try:
             await BookModel.filter(id=book_id).update(**book.dict(exclude_unset=True))
