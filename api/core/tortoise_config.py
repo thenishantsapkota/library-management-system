@@ -15,7 +15,13 @@ tortoise_config = {
     },
     "apps": {
         "main": {
-            "models": ["api.core.books.models", "aerich.models"],
+            "models": [
+                "api.core.books.models",
+                "aerich.models",
+                "api.core.borrowed.models",
+                "api.core.returned.models",
+                "api.core.students.models",
+            ],
             "default_connection": "default",
         }
     },
