@@ -13,9 +13,13 @@ uvicorn = {extras = ["standard"], version = "^0.17.6"}
 pydantic = {extras = ["email"], version = "^1.9.0"}
 tortoise-orm = {extras = ["asyncpg"], version = "^0.19.0"}
 aerich = "^0.6.3"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
+flake8 = "^4.0.1"
 
 
 [tool.aerich]
