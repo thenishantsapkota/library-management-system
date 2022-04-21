@@ -14,13 +14,17 @@ class BookView:
         data = await Book_Pydantic.from_queryset(BookModel.all())
         if not data:
             raise HTTPException(status_code=404, detail="No books could be found!")
-        return {"success": True, "data": data}
+        return {
+            "success": True,
+            "data": data,
+            "message": "All books fetched successfully!",
+        }
 
     @router.post("/add-book")
     async def add_book(self, book: BookIn_Pydantic):
         book_obj = await BookModel.create(**book.dict(exclude_unset=True))
         data = await Book_Pydantic.from_tortoise_orm(book_obj)
-        return {"success": True, "data": data}
+        return {"success": True, "data": data, "message": "Book added successfully!"}
 
     @router.put("/update-book/{book_id}")
     async def update_book(self, book_id: int, book: BookIn_Pydantic):
@@ -32,7 +36,7 @@ class BookView:
                 status_code=404, detail="No Book with the specified Id could be found!"
             )
         data = await Book_Pydantic.from_queryset_single(BookModel.get(id=book_id))
-        return {"success": True, "data": data}
+        return {"success": True, "data": data, "message": "Book updated successfully!"}
 
     @router.delete("/delete-book/{book_id}")
     async def delete_book(self, book_id: int):
@@ -42,4 +46,4 @@ class BookView:
                 status_code=404, detail="No book with the specified Id could be found!"
             )
         await model.delete()
-        return {"success": True, "message": "Book deleted successfully!"}
+        return {"success": True, "data": {}, "message": "Book deleted successfully!"}
