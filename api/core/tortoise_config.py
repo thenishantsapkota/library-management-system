@@ -21,6 +21,7 @@ tortoise_config = {
                 "api.core.borrowed.models",
                 "api.core.returned.models",
                 "api.core.students.models",
+                "api.core.auth.models",
             ],
             "default_connection": "default",
         }
