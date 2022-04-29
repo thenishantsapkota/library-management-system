@@ -1,13 +1,15 @@
-from datetime import datetime, timedelta
-
-from api.config import api_config
-from api.core.auth.models import User, User_Pydantic, UserIn_Pydantic, UserOut_Pydantic
+from api.core.auth.models import (
+    User_Pydantic,
+    UserIn_Pydantic,
+    UserModel,
+    UserOut_Pydantic,
+)
 from api.core.auth.service import AuthService
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
-from jose import jwt
+from tortoise.exceptions import IntegrityError
 
 router = InferringRouter(tags=["Authentication"])
 
@@ -18,12 +20,17 @@ class AuthView:
 
     @router.post("/register")
     async def register_user(self, user: UserIn_Pydantic):
-        user_obj = await User.create(
-            username=user.username,
-            full_name=user.full_name,
-            email=user.email,
-            password=self.auth_service.hash_password(user.password),
-        )
+        try:
+            user_obj = await UserModel.create(
+                username=user.username,
+                full_name=user.full_name,
+                email=user.email,
+                password=self.auth_service.hash_password(user.password),
+            )
+        except IntegrityError:
+            raise HTTPException(
+                detail="Username or email already exists!", status_code=400
+            )
         data = await UserOut_Pydantic.from_tortoise_orm(user_obj)
         return {"success": True, "data": data}
 
@@ -52,4 +59,5 @@ class AuthView:
     async def get_user(
         self, user: User_Pydantic = Depends(auth_service.get_current_user)
     ):
-        return {"success": True, "data": user, "message": "User fetched successfully!"}
+        data = user.dict(exclude={"password", "is_superuser"})
+        return {"success": True, "data": data, "message": "User fetched successfully!"}
