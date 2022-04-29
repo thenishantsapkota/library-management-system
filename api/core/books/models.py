@@ -3,12 +3,7 @@ from tortoise.contrib.pydantic import pydantic_model_creator
 from tortoise.models import Model
 
 
-class BaseModel(Model):
-    created_at = fields.DatetimeField(auto_now_add=True)
-    updated_at = fields.DatetimeField(auto_now=True)
-
-
-class BookModel(BaseModel):
+class BookModel(Model):
     id = fields.IntField(pk=True)
     name = fields.TextField(max_length=200)
     description = fields.TextField(max_length=200)
@@ -23,3 +18,4 @@ Book_Pydantic = pydantic_model_creator(BookModel, name="Book")
 BookIn_Pydantic = pydantic_model_creator(
     BookModel, name="BookIn", exclude_readonly=True
 )
+BookOut_Pydantic = pydantic_model_creator(BookModel, name="BookOut")
