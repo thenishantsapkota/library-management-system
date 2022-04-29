@@ -3,8 +3,6 @@ import logging
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
-from sqlalchemy import JSON
-from starlette.requests import Request
 from tortoise import Tortoise
 
 from api.core.auth.views import router as auth
