@@ -1,8 +1,10 @@
 from api.core.auth.models import User_Pydantic
 from api.core.auth.service import AuthService, SuperUserValidator
+from api.utils import CustomResponse as cr
 from fastapi import Depends, HTTPException, status
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
+from tortoise.exceptions import IntegrityError
 
 from .models import Book_Pydantic, BookIn_Pydantic, BookModel, BookOut_Pydantic
 
@@ -21,11 +23,7 @@ class BookView:
         data = await Book_Pydantic.from_queryset(BookModel.all())
         if not data:
             raise HTTPException(status_code=404, detail="No books could be found!")
-        return {
-            "success": True,
-            "data": data,
-            "message": "All books fetched successfully!",
-        }
+        return cr.success(data, "All books fetched successfully!")
 
     @router.get("/{book_id}")
     async def get_one_book(
@@ -38,11 +36,7 @@ class BookView:
                 detail=f"Book not found for Id {book_id}",
             )
         data = await BookOut_Pydantic.from_tortoise_orm(book_obj)
-        return {
-            "success": True,
-            "data": data,
-            "message": "Book retrieved successfully!",
-        }
+        return cr.success(data, "Book retrieved successfully!")
 
     @router.post("/add-book", dependencies=[Depends(validate_superuser)])
     async def add_book(
@@ -50,9 +44,16 @@ class BookView:
         book: BookIn_Pydantic,
         _: User_Pydantic = Depends(auth_service.get_current_user),
     ):
-        book_obj = await BookModel.create(**book.dict(exclude_unset=True))
+        try:
+            book_obj = await BookModel.create(**book.dict(exclude_unset=True))
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Book with same book code already exists!",
+            )
+
         data = await BookOut_Pydantic.from_tortoise_orm(book_obj)
-        return {"success": True, "data": data, "message": "Book added successfully!"}
+        return cr.success(data, "Book added successfully!")
 
     @router.put("/update-book/{book_id}", dependencies=[Depends(validate_superuser)])
     async def update_book(
@@ -69,7 +70,7 @@ class BookView:
                 status_code=404, detail=f"Book not found for Id {book_id}"
             )
         data = await BookOut_Pydantic.from_queryset_single(BookModel.get(id=book_id))
-        return {"success": True, "data": data, "message": "Book updated successfully!"}
+        return cr.success(data, "Book updated successfully!")
 
     @router.delete("/delete-book/{book_id}", dependencies=[Depends(validate_superuser)])
     async def delete_book(
@@ -83,4 +84,4 @@ class BookView:
             )
         data = await BookOut_Pydantic.from_tortoise_orm(model)
         await model.delete()
-        return {"success": True, "data": data, "message": "Book deleted successfully!"}
+        return cr.success(data, "Book deleted successfully!")
