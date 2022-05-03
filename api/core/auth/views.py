@@ -5,6 +5,7 @@ from api.core.auth.models import (
     UserOut_Pydantic,
 )
 from api.core.auth.service import AuthService
+from api.utils import CustomResponse as cr
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_utils.cbv import cbv
@@ -32,7 +33,7 @@ class AuthView:
                 detail="Username or email already exists!", status_code=400
             )
         data = await UserOut_Pydantic.from_tortoise_orm(user_obj)
-        return {"success": True, "data": data}
+        return cr.success(data, "User registered successfully!")
 
     @router.post("/login")
     async def login_user(self, form_data: OAuth2PasswordRequestForm = Depends()):
@@ -49,15 +50,11 @@ class AuthView:
         data = user_obj.dict()
         token = self.auth_service.create_access_token(data)
 
-        return {
-            "success": True,
-            "data": {"access_token": token},
-            "message": "User logged in successfully!",
-        }
+        return cr.success({"access_token": token}, "User logged in successfully!")
 
     @router.get("/profile")
     async def get_user(
         self, user: User_Pydantic = Depends(auth_service.get_current_user)
     ):
         data = user.dict(exclude={"password", "is_superuser"})
-        return {"success": True, "data": data, "message": "User fetched successfully!"}
+        return cr.success(data, "User fetched successfully!")
