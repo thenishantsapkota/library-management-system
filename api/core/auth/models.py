@@ -13,8 +13,8 @@ class UserModel(Model):
 
 User_Pydantic = pydantic_model_creator(UserModel, name="User")
 UserIn_Pydantic = pydantic_model_creator(
-    UserModel, name="UserIn", exclude_readonly=True
+    UserModel, name="UserIn", exclude_readonly=True, exclude=("is_superuser",)
 )
 UserOut_Pydantic = pydantic_model_creator(
-    UserModel, name="UserOut", exclude=("password", "role")
+    UserModel, name="UserOut", exclude=("password", "is_superuser")
 )
