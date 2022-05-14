@@ -6,9 +6,9 @@ from tortoise.models import Model
 class StudentModel(Model):
     id = fields.IntField(pk=True, index=True)
     name = fields.CharField(max_length=200, null=True)
-    roll_number = fields.CharField(unique=True, max_length=200)
+    roll_number = fields.CharField(unique=True, max_length=200, null=True)
     date_of_birth = fields.TextField(null=True)
-    email = fields.CharField(unique=True, max_length=200)
+    email = fields.CharField(unique=True, max_length=200, null=True)
 
 
 Student_Pydantic = pydantic_model_creator(StudentModel, name="Student")

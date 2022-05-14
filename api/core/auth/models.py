@@ -4,10 +4,10 @@ from tortoise.contrib.pydantic import pydantic_model_creator
 
 class UserModel(Model):
     id = fields.IntField(pk=True, index=True)
-    username = fields.CharField(unique=True, max_length=200)
-    email = fields.CharField(unique=True, max_length=200)
+    username = fields.CharField(unique=True, max_length=200, null=True)
+    email = fields.CharField(unique=True, max_length=200, null=True)
     full_name = fields.TextField(null=True)
-    password = fields.TextField()
+    password = fields.TextField(null=True)
     is_superuser = fields.BooleanField(null=True, default=False)
 
 

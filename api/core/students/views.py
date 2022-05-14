@@ -58,7 +58,7 @@ class StudentView:
         data = await Student_Pydantic.from_tortoise_orm(student_obj)
         return cr.success(data, "Student added successfully!")
 
-    @router.put(
+    @router.patch(
         "/update-student/{student_id}", dependencies=[Depends(validate_superuser)]
     )
     async def update_student(
@@ -67,9 +67,15 @@ class StudentView:
         student: StudentIn_Pydantic,
         _: User_Pydantic = Depends(auth_service.get_current_user),
     ):
-        query = await StudentModel.filter(id=student_id).update(
-            **student.dict(exclude_unset=True)
-        )
+        try:
+            query = await StudentModel.filter(id=student_id).update(
+                **student.dict(exclude_unset=True)
+            )
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email or roll number already exists!",
+            )
         if not query:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
