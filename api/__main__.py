@@ -10,6 +10,8 @@ from api.core.books.views import router as books
 from api.core.students.views import router as students
 from api.core.tortoise_config import tortoise_config
 
+from . import __version__
+
 logger = logging.getLogger("main")
 
 tags = [
@@ -28,7 +30,7 @@ app = FastAPI(
     title="Library Management System - Backend",
     docs_url="/",
     redoc_url=None,
-    version="0.1.0",
+    version=__version__,
     contact={
         "name": "Nishant Sapkota",
         "url": "https://thenishantsapkota.github.io",
@@ -36,6 +38,7 @@ app = FastAPI(
     },
     openapi_tags=tags,
 )
+
 
 app.include_router(auth, prefix="/auth")
 app.include_router(books, prefix="/books")
