@@ -61,6 +61,6 @@ class SuperUserValidator:
     def __call__(self, user: User_Pydantic = Depends(AuthService.get_current_user)):
         if not user.is_superuser:
             raise HTTPException(
-                status_code=403,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="You are not permitted to perform this operation",
             )

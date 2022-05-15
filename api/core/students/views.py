@@ -2,6 +2,7 @@ from email.policy import HTTP
 
 from api.core.auth.models import User_Pydantic
 from api.core.auth.service import AuthService, SuperUserValidator
+from api.core.paginations import paginate
 from api.core.students.models import Student_Pydantic, StudentIn_Pydantic, StudentModel
 from api.utils import CustomResponse as cr
 from fastapi import Depends, HTTPException, status
@@ -19,7 +20,10 @@ class StudentView:
 
     @router.get("/", dependencies=[Depends(validate_superuser)])
     async def get_all_students(
-        self, _: User_Pydantic = Depends(auth_service.get_current_user)
+        self,
+        page_num: int = 1,
+        page_size: int = 5,
+        _: User_Pydantic = Depends(auth_service.get_current_user),
     ):
         data = await Student_Pydantic.from_queryset(StudentModel.all())
         if not data:
@@ -27,7 +31,10 @@ class StudentView:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No students could be found!",
             )
-        return cr.success(data, "All students fetched successfully!")
+        paginated_data = paginate(
+            base_url="students", data=data, page_num=page_num, page_size=page_size
+        )
+        return cr.success(paginated_data, "All students fetched successfully!")
 
     @router.get("/{student_id}", dependencies=[Depends(validate_superuser)])
     async def get_one_student(

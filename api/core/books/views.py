@@ -1,5 +1,6 @@
 from api.core.auth.models import User_Pydantic
 from api.core.auth.service import AuthService, SuperUserValidator
+from api.core.paginations import paginate
 from api.utils import CustomResponse as cr
 from fastapi import Depends, HTTPException, status
 from fastapi_utils.cbv import cbv
@@ -18,12 +19,21 @@ class BookView:
 
     @router.get("/")
     async def get_all_books(
-        self, _: User_Pydantic = Depends(auth_service.get_current_user)
+        self,
+        page_num: int = 1,
+        page_size: int = 5,
+        _: User_Pydantic = Depends(auth_service.get_current_user),
     ):
         data = await Book_Pydantic.from_queryset(BookModel.all())
         if not data:
             raise HTTPException(status_code=404, detail="No books could be found!")
-        return cr.success(data, "All books fetched successfully!")
+        if not page_num or not page_size:
+            paginated_data = paginate("books", data)
+        else:
+            paginated_data = paginate(
+                base_url="books", data=data, page_num=page_num, page_size=page_size
+            )
+        return cr.success(paginated_data, "All books fetched successfully!")
 
     @router.get("/{book_id}")
     async def get_one_book(
@@ -62,9 +72,15 @@ class BookView:
         book: BookIn_Pydantic,
         _: User_Pydantic = Depends(auth_service.get_current_user),
     ):
-        query = await BookModel.filter(id=book_id).update(
-            **book.dict(exclude_unset=True)
-        )
+        try:
+            query = await BookModel.filter(id=book_id).update(
+                **book.dict(exclude_unset=True)
+            )
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Book with same book code already exists!",
+            )
         if not query:
             raise HTTPException(
                 status_code=404, detail=f"Book not found for Id {book_id}"
