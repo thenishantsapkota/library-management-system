@@ -7,6 +7,7 @@ from tortoise import Tortoise
 
 from api.core.auth.views import router as auth
 from api.core.books.views import router as books
+from api.core.borrowed.views import router as borrowed
 from api.core.students.views import router as students
 from api.core.tortoise_config import tortoise_config
 
@@ -24,6 +25,7 @@ tags = [
         "name": "Students",
         "description": "All the operations related to Student management",
     },
+    {"name": "Borrowed", "description": "All the operations related to Book Borrowing"},
 ]
 
 app = FastAPI(
@@ -40,9 +42,10 @@ app = FastAPI(
 )
 
 
-app.include_router(auth, prefix="/auth")
-app.include_router(books, prefix="/books")
-app.include_router(students, prefix="/students")
+app.include_router(auth, prefix="/api/auth")
+app.include_router(books, prefix="/api/books")
+app.include_router(students, prefix="/api/students")
+app.include_router(borrowed, prefix="/api/borrowed")
 
 
 @app.on_event("startup")
