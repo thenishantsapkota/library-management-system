@@ -26,7 +26,7 @@ class BookView:
     ):
         data = await Book_Pydantic.from_queryset(BookModel.all())
         if not data:
-            raise HTTPException(status_code=404, detail="No books could be found!")
+            paginated_data = []
         if not page_num or not page_size:
             paginated_data = paginate("books", data)
         else:

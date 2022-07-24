@@ -1,4 +1,5 @@
 from api.core.auth.models import (
+    PasswordIn_Pydantic,
     User_Pydantic,
     UserIn_Pydantic,
     UserModel,
@@ -58,3 +59,20 @@ class AuthView:
     ):
         data = user.dict(exclude={"password", "is_superuser"})
         return cr.success(data, "User fetched successfully!")
+
+    @router.post("/change-password")
+    async def change_password(
+        self,
+        password: PasswordIn_Pydantic,
+        user: User_Pydantic = Depends(auth_service.get_current_user),
+    ):
+        pwd = (password.dict(exclude_unset=True)).get("password")
+        if not pwd:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Body must contain a password field.",
+            )
+        await UserModel.filter(id=user.id).update(
+            password=self.auth_service.hash_password(pwd)
+        )
+        return cr.success(message="Password updated successfully.")

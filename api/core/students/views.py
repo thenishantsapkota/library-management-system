@@ -1,5 +1,3 @@
-from email.policy import HTTP
-
 from api.core.auth.models import User_Pydantic
 from api.core.auth.service import AuthService, SuperUserValidator
 from api.core.paginations import paginate
@@ -27,10 +25,7 @@ class StudentView:
     ):
         data = await Student_Pydantic.from_queryset(StudentModel.all())
         if not data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No students could be found!",
-            )
+            paginated_data = []
         paginated_data = paginate(
             base_url="students", data=data, page_num=page_num, page_size=page_size
         )
